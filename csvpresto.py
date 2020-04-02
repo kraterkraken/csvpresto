@@ -92,7 +92,7 @@ for ctr, row in enumerate(data):
         break
     for result_index, row_index in enumerate(stat_list):
         #print("tallying for group {}".format(curr_group))
-        sum[result_index] += int(row[row_index])
+        sum[result_index] += float(row[row_index])
         count[result_index] += 1
 
     prev_group = curr_group
