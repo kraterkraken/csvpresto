@@ -29,7 +29,7 @@ class ArgRetriever:
             help="The statistical operation to perform")
         args = parser.parse_args()
 
-        print(args)
+        #print(args)
         self.group_cols = args.group_cols
         self.stat_cols = args.stat_cols
         self.file_name = args.file_name
