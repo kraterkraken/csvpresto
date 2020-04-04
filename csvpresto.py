@@ -96,7 +96,7 @@ for ctr, row in enumerate(data):
     if ctr == len(data) - 1:
         break
 
-    # tabulate the results for the cureent row
+    # tabulate the results for the current row
     for result_index, row_index in enumerate(stat_list):
         sum[result_index] += float(row[row_index])
         count[result_index] += 1
