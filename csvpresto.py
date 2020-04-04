@@ -58,7 +58,9 @@ for col in group_list:
 group_list.reverse() # put the order back again
 
 # print the headers that we need
+print()
 print("{} ... {}".format(list_to_string([headers[i] for i in group_list]), list_to_string([headers[i] for i in stat_list])))
+print("-----------------------------------------------------------------------")
 
 # now iterate over the data, performing the desired operation for each group
 # and printing the results
@@ -69,7 +71,7 @@ sum = [0 for a in stat_list]
 count = [0 for a in stat_list]
 avg = [0 for a in stat_list]
 result = []
-#print("-------------")
+
 for ctr, row in enumerate(data):
 
     curr_group = [val for col, val in enumerate(row) if col in group_list]
