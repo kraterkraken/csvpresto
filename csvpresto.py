@@ -45,7 +45,7 @@ stat_list = [int(a) for a in arg_retriever.stat_cols]
 data = []
 with open(arg_retriever.file_name) as file:
     data = [line.split(",") for line in file]
-headers = data[:1]
+headers = data[:1][0]
 data = data[1:]
 if len(data) == 0:
     print("No data in file.")
@@ -57,12 +57,14 @@ for col in group_list:
     data.sort(key=lambda x: x[col])
 group_list.reverse() # put the order back again
 
-#print(data)
+# print the headers that we need
+print("{} ... {}".format(list_to_string([headers[i] for i in group_list]), list_to_string([headers[i] for i in stat_list])))
 
 # now iterate over the data, performing the desired operation for each group
-data.append([None for a in data[0]])
+# and printing the results
+data.append([None for a in data[0]]) # add a a dummy row as the last row ... see below for why
 prev_group = [val for col, val in enumerate(data[0]) if col in group_list]
-#print(prev_group)
+
 sum = [0 for a in stat_list]
 count = [0 for a in stat_list]
 avg = [0 for a in stat_list]
@@ -72,8 +74,9 @@ for ctr, row in enumerate(data):
 
     curr_group = [val for col, val in enumerate(row) if col in group_list]
 
+    # if the group changed, print the results for the previous group
+    # then reset the results for this new group
     if curr_group != prev_group:
-        #print("group changed! to {}".format(curr_group))
         if arg_retriever.operation == "SUM":
             result = sum
         elif arg_retriever.operation == "COUNT":
@@ -88,10 +91,13 @@ for ctr, row in enumerate(data):
         avg = [0 for a in stat_list]
         result = []
 
+    # if we are on the last row (the dummy row ... see above),
+    # then there are no results to tabulate, so just exit the loop (we are done)
     if ctr == len(data) - 1:
         break
+
+    # tabulate the results for the cureent row
     for result_index, row_index in enumerate(stat_list):
-        #print("tallying for group {}".format(curr_group))
         sum[result_index] += float(row[row_index])
         count[result_index] += 1
 
