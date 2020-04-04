@@ -47,13 +47,22 @@ with open(arg_retriever.file_name) as file:
     data = [line.split(",") for line in file]
 headers = data[:1][0]
 data = data[1:]
+
+# validate that the data makes sense with the given group and stat columns
 if len(data) == 0:
     print("No data in file.")
     sys.exit(0)
+if max(group_list) >= len(headers):
+    print("Error: a specified group column is greater than the number of columns.")
+    sys.exit(-1)
+if max(stat_list) >= len(headers):
+    print("Error: a specified stat column is greater than the number of columns.")
+    sys.exit(-1)
 
-##################################################################################
-##### TODO - validate that the cols in -g and -s are within the bounds of the file
-##################################################################################
+###############################################################################
+##### TODO - Handle data cells that are QUOTED strings with embedded commas
+##### TODO - Verify that all rows have the same number of columns
+###############################################################################
 
 # sort the data by the grouping columns
 group_list.reverse() # reverse the order so the sorting works
