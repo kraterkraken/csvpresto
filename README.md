@@ -5,7 +5,7 @@ Program to read in a CSV file and perform statistical operations on various colu
 
 ### Usage:
 
-csvpresto -g <collist> -s <collist> -o <SUM|COUNT|AVG> -f filename
+`csvpresto -g <collist> -s <collist> -o <SUM|COUNT|AVG> -f filename`
 
 where
 
