@@ -5,6 +5,13 @@ if sys.version_info.major < 3 or sys.version_info.minor < 2:
     print("Error: csvpresto requires Python 3.2 or higher")
     sys.exit(-1)
 
+def validate_number(s, row, col):
+    try:
+        float(s)
+    except ValueError:
+        print("Error: found non-numeric data '{}' in row {}, column {}".format(s, row, col))
+        sys.exit(-1)
+
 def list_to_string(l):
     return ", ".join([str(a) for a in l])
 
@@ -43,6 +50,10 @@ data = data[1:]
 if len(data) == 0:
     print("No data in file.")
     sys.exit(0)
+
+##################################################################################
+##### TODO - validate that the cols in -g and -s are within the bounds of the file
+##################################################################################
 
 # sort the data by the grouping columns
 group_list.reverse() # reverse the order so the sorting works
@@ -96,6 +107,7 @@ for ctr, row in enumerate(data):
 
     # tabulate the results for the current row
     for result_index, row_index in enumerate(stat_list):
+        validate_number(row[row_index], ctr, row_index)
         sum[result_index] += float(row[row_index])
         count[result_index] += 1
 
