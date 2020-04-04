@@ -2,15 +2,13 @@ from argparse import ArgumentParser
 import sys
 
 if sys.version_info.major < 3 or sys.version_info.minor < 2:
-    print("Error: csvpresto requires Python 3.2 or higher")
-    sys.exit(-1)
+    sys.exit("Error: csvpresto requires Python 3.2 or higher")
 
 def validate_number(s, row, col):
     try:
         float(s)
     except ValueError:
-        print("Error: found non-numeric data '{}' in row {}, column {}".format(s, row, col))
-        sys.exit(-1)
+        sys.exit("Error: found non-numeric data '{}' in row {}, column {}".format(s, row, col))
 
 def list_to_string(l):
     return ", ".join([str(a) for a in l])
@@ -50,14 +48,11 @@ data = data[1:]
 
 # validate that the data makes sense with the given group and stat columns
 if len(data) == 0:
-    print("No data in file.")
-    sys.exit(0)
+    sys.exit("No data in file.")
 if max(group_list) >= len(headers):
-    print("Error: a specified group column is greater than the number of columns.")
-    sys.exit(-1)
+    sys.exit("Error: a specified group column is greater than the number of columns.")
 if max(stat_list) >= len(headers):
-    print("Error: a specified stat column is greater than the number of columns.")
-    sys.exit(-1)
+    sys.exit("Error: a specified stat column is greater than the number of columns.")
 
 ###############################################################################
 ##### TODO - Handle data cells that are QUOTED strings with embedded commas
