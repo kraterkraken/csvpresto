@@ -59,7 +59,10 @@ group_list.reverse() # put the order back again
 
 # print the headers that we need
 print()
-print("{} ... {}".format(list_to_string([headers[i] for i in group_list]), list_to_string([headers[i] for i in stat_list])))
+print("{} ... {}".format(
+    list_to_string([headers[i] for i in group_list]),
+    list_to_string([headers[i] for i in stat_list]))
+    )
 print("-----------------------------------------------------------------------")
 
 # now iterate over the data, performing the desired operation for each group
