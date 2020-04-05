@@ -1,4 +1,5 @@
 from argparse import ArgumentParser
+from csv import reader
 import sys
 
 if sys.version_info.major < 3 or sys.version_info.minor < 2:
@@ -41,7 +42,8 @@ stat_list = [int(a) for a in arg_retriever.stat_cols]
 # read the data from the file into a 2D list
 data = []
 with open(arg_retriever.file_name) as file:
-    data = [line.split(",") for line in file]
+    csv_reader = reader(file)
+    data = [line for line in csv_reader]
 headers = data[:1][0]
 data = data[1:]
 
@@ -53,10 +55,9 @@ if max(group_list) >= len(headers):
 if max(stat_list) >= len(headers):
     sys.exit("Error: a specified stat column is greater than the number of columns.")
 
-###############################################################################
-##### TODO - Handle data cells that are QUOTED strings with embedded commas
-##### TODO - Verify that all rows have the same number of columns
-###############################################################################
+for i, row in enumerate(data):
+    if len(row) != len(headers):
+        sys,exit("Error: row {} has the wrong number of columns.".format(i))
 
 # sort the data by the grouping columns
 group_list.reverse() # reverse the order so the sorting works
