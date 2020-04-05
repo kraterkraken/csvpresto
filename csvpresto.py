@@ -47,7 +47,7 @@ with open(arg_retriever.file_name) as file:
 headers = data[:1][0]
 data = data[1:]
 
-# validate that the data makes sense with the given group and stat columns
+# validate the data file
 if len(data) == 0:
     sys.exit("No data in file.")
 if max(group_list) >= len(headers):
