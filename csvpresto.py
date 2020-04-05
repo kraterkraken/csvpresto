@@ -31,7 +31,7 @@ class ArgRetriever:
         self.group_cols = args.group_cols
         self.stat_cols = args.stat_cols
         self.file_name = args.file_name
-        self.operation = args.operation
+        self.operation = args.operation.upper()
 
 
 # ------------------- MAIN PROGRAM --------------------------------------------
