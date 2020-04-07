@@ -14,6 +14,9 @@ def validate_number(s, row, col):
 def list_to_string(l):
     return ", ".join([str(a) for a in l])
 
+def upper_string(s):
+    return s.upper()
+
 class ArgRetriever:
     def __init__(self):
         parser = ArgumentParser()
@@ -23,7 +26,7 @@ class ArgRetriever:
             help="The list of columns to gather stats on.  Ex: 5 6 7")
         parser.add_argument("-f", dest="file_name", required=True,
             help="The CSV file to use as input")
-        parser.add_argument("-o", dest="operation", required=True,
+        parser.add_argument("-o", dest="operation", required=True, type=upper_string,
             choices=["SUM", "COUNT", "AVG"], default="SUM",
             help="The statistical operation to perform")
         args = parser.parse_args()
@@ -31,7 +34,7 @@ class ArgRetriever:
         self.group_cols = args.group_cols
         self.stat_cols = args.stat_cols
         self.file_name = args.file_name
-        self.operation = args.operation.upper()
+        self.operation = args.operation
 
 
 # ------------------- MAIN PROGRAM --------------------------------------------
