@@ -114,8 +114,9 @@ for ctr, row in enumerate(data):
 
     # tabulate the results for the current row
     for result_index, row_index in enumerate(stat_list):
-        validate_number(row[row_index], ctr, row_index)
-        sum[result_index] += float(row[row_index])
+        if args.operation != "COUNT":
+            validate_number(row[row_index], ctr, row_index)
+            sum[result_index] += float(row[row_index])
         count[result_index] += 1
 
     prev_group = curr_group
