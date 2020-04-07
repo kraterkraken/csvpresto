@@ -38,13 +38,13 @@ class ArgRetriever:
 
 
 # ------------------- MAIN PROGRAM --------------------------------------------
-arg_retriever = ArgRetriever()
-group_list = [int(a) for a in arg_retriever.group_cols]
-stat_list = [int(a) for a in arg_retriever.stat_cols]
+args = ArgRetriever()
+group_list = [int(a) for a in args.group_cols]
+stat_list = [int(a) for a in args.stat_cols]
 
 # read the data from the file into a 2D list
 data = []
-with open(arg_retriever.file_name) as file:
+with open(args.file_name) as file:
     csv_reader = reader(file)
     data = [line for line in csv_reader]
 headers = data[:1][0]
@@ -93,11 +93,11 @@ for ctr, row in enumerate(data):
     # if the group changed, print the results for the previous group
     # then reset the results for this new group
     if curr_group != prev_group:
-        if arg_retriever.operation == "SUM":
+        if args.operation == "SUM":
             result = sum
-        elif arg_retriever.operation == "COUNT":
+        elif args.operation == "COUNT":
             result = count
-        elif arg_retriever.operation == "AVG":
+        elif args.operation == "AVG":
             result = [float(s)/float(c) for s,c in zip(sum,count)]
 
         print("{} ... {}".format(list_to_string(prev_group), list_to_string(result)))
