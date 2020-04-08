@@ -43,6 +43,8 @@ group_list = [int(a) for a in args.group_cols]
 stat_list = [int(a) for a in args.stat_cols]
 
 # read the data from the file into a 2D list
+# (note: I am using the csv module's reader object
+# to automagically handle commas inside quoted strings)
 data = []
 with open(args.file_name) as file:
     data = [line for line in reader(file)]
