@@ -53,7 +53,6 @@ class ArgRetriever:
         self.operation == None or
         self.file_name == None):
             print("Error: If -a is not specified, then both -g and -s must be supplied.\n")
-            parser.print_help()
             sys.exit(1)
 
 
