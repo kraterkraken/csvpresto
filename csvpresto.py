@@ -9,7 +9,7 @@ def validate_number(s, row, col):
     try:
         float(s)
     except ValueError:
-        sys.exit("Error: found non-numeric data '{}' in row {}, column {}".format(s, row, col))
+        sys.exit(f"Error: found non-numeric data '{s}' in row {row}, column {col}")
 
 def list_to_string(l):
     return ", ".join([str(a) for a in l])
@@ -18,9 +18,7 @@ def upper_string(s):
     return s.upper()
 
 def pad_left(s, n):
-    # function that returns string s, left padded with spaces so that it is
-    # at least n characters long
-
+    # return s left-padded with spaces so that it is at least n characters long
     padding = " " * (n - len(s)) # this automatically does the right thing if len >= n
     return padding + s
 
@@ -93,7 +91,7 @@ if max(stat_list) >= len(headers):
 
 for i, row in enumerate(data):
     if len(row) != len(headers):
-        sys,exit("Error: row {i} has the wrong number of columns.".format(i))
+        sys,exit(f"Error: row {i} has the wrong number of columns.")
 
 # sort the data by the grouping columns
 group_list.reverse() # reverse the order so the sorting works
@@ -133,7 +131,7 @@ for ctr, row in enumerate(data):
         elif args.operation == "AVG":
             result = [float(s)/float(c) for s,c in zip(sum,count)]
 
-        print("{} ... {}".format(list_to_string(prev_group), list_to_string(result)))
+        print(f"{list_to_string(prev_group)} ... {list_to_string(result)}")
 
         sum = [0 for a in stat_list]
         count = [0 for a in stat_list]
