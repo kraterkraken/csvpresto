@@ -52,8 +52,7 @@ class ArgRetriever:
         self.stat_cols == None or
         self.operation == None or
         self.file_name == None):
-            print("Error: If -a is not specified, then both -g and -s must be supplied.\n")
-            sys.exit(1)
+            sys.exit("Error: If -a is not specified, then both -g and -s must be supplied.")
 
 
 # ------------------- MAIN PROGRAM --------------------------------------------
