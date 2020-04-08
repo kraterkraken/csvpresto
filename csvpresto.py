@@ -17,30 +17,50 @@ def list_to_string(l):
 def upper_string(s):
     return s.upper()
 
+def pad_left(s, n):
+    # function that returns string s, left padded with spaces so that it is
+    # at least n characters long
+
+    padding = " " * (n - len(s)) # this automatically does the right thing if len >= n
+    return padding + s
+
 class ArgRetriever:
     def __init__(self):
         parser = ArgumentParser()
-        parser.add_argument("-g", dest="group_cols", nargs='+', type=int, required=True,
+        parser.add_argument("-g", dest="group_cols", nargs='+', type=int,
             help="The list of columns to group by.  Ex: 1 2 3 4")
-        parser.add_argument("-s", dest="stat_cols", nargs='+', type=int, required=True,
+        parser.add_argument("-s", dest="stat_cols", nargs='+', type=int,
             help="The list of columns to gather stats on.  Ex: 5 6 7")
         parser.add_argument("-f", dest="file_name", required=True,
             help="The CSV file to use as input")
-        parser.add_argument("-o", dest="operation", required=True, type=upper_string,
+        parser.add_argument("-o", dest="operation", type=upper_string,
             choices=["SUM", "COUNT", "AVG"], default="SUM",
             help="The statistical operation to perform")
+        parser.add_argument("-a", dest="analyze_headers", action="store_true",
+            help="Indicates that the program should spit out an analysis of the "
+            "headers to help the user choose columns for grouping and stat "
+            "operations.  Note that this option overrides all the others.")
         args = parser.parse_args()
 
+        self.analyze_headers = args.analyze_headers
         self.group_cols = args.group_cols
         self.stat_cols = args.stat_cols
         self.file_name = args.file_name
         self.operation = args.operation
 
+        if self.analyze_headers:
+            pass
+        elif (self.group_cols == None or
+        self.stat_cols == None or
+        self.operation == None or
+        self.file_name == None):
+            print("Error: If -a is not specified, then both -g and -s must be supplied.\n")
+            parser.print_help()
+            sys.exit(1)
+
 
 # ------------------- MAIN PROGRAM --------------------------------------------
 args = ArgRetriever()
-group_list = [int(a) for a in args.group_cols]
-stat_list = [int(a) for a in args.stat_cols]
 
 # read the data from the file into a 2D list
 # (note: I am using the csv module's reader object
@@ -50,6 +70,18 @@ with open(args.file_name) as file:
     data = [line for line in reader(file)]
 headers = data[:1][0]
 data = data[1:]
+
+# if the header analysis flag was specified, display the cols and headers, then exit
+if args.analyze_headers:
+    print("Column\tHeader (Description)")
+    print("------\t--------------------")
+    for i, header in enumerate(headers):
+        print(f"{pad_left(str(i), 6)}\t{header}")
+    sys.exit(0)
+
+# put the string arguments into a list as integers
+group_list = [int(a) for a in args.group_cols]
+stat_list = [int(a) for a in args.stat_cols]
 
 # validate the data
 if len(data) == 0:
@@ -61,7 +93,7 @@ if max(stat_list) >= len(headers):
 
 for i, row in enumerate(data):
     if len(row) != len(headers):
-        sys,exit("Error: row {} has the wrong number of columns.".format(i))
+        sys,exit("Error: row {i} has the wrong number of columns.".format(i))
 
 # sort the data by the grouping columns
 group_list.reverse() # reverse the order so the sorting works
