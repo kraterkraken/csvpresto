@@ -45,8 +45,7 @@ stat_list = [int(a) for a in args.stat_cols]
 # read the data from the file into a 2D list
 data = []
 with open(args.file_name) as file:
-    csv_reader = reader(file)
-    data = [line for line in csv_reader]
+    data = [line for line in reader(file)]
 headers = data[:1][0]
 data = data[1:]
 
