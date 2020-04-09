@@ -59,8 +59,12 @@ args = ArgRetriever()
 # (note: I am using the csv module's reader object
 # to automagically handle commas inside quoted strings)
 data = []
-with open(args.file_name) as file:
-    data = [line for line in reader(file)]
+try:
+    with open(args.file_name) as file:
+        data = [line for line in reader(file)]
+except FileNotFoundError:
+    exit(f"Error: file not found - {args.file_name}")
+
 headers = data[:1][0]
 data = data[1:]
 
