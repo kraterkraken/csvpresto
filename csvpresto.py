@@ -48,10 +48,7 @@ class ArgRetriever:
 
         if self.analyze_headers:
             pass
-        elif (self.group_cols == None or
-        self.stat_cols == None or
-        self.operation == None or
-        self.file_name == None):
+        elif (self.group_cols == None or self.stat_cols == None):
             sys.exit("Error: If -a is not specified, then both -g and -s must be supplied.")
 
 
