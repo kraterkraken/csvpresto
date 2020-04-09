@@ -5,7 +5,8 @@ Program to read in a CSV file and perform statistical operations on various colu
 
 ### Usage:
 
-`csvpresto.py operation filename
+```
+csvpresto.py operation filename
               [-h]
               [-g col [col ...]] [-s col [col ...]]
 
@@ -24,4 +25,5 @@ positional arguments:
 optional arguments:
   -h, --help        show this help message and exit
   -g col [col ...]  The list of columns to group by. Ex: -g 1 2 3 4
-  -s col [col ...]  The list of columns to perform stats on. Ex: -s 5 6 7`
+  -s col [col ...]  The list of columns to perform stats on. Ex: -s 5 6 7
+  ```
