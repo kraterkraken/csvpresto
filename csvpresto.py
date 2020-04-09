@@ -24,7 +24,9 @@ def pad_left(s, n):
 
 class ArgRetriever:
     def __init__(self):
-        parser = ArgumentParser()
+        parser = ArgumentParser(
+            usage="%(prog)s operation filename [options]",
+            description="Program to read in a CSV file and perform statistical operations on various columns.")
 
         parser.add_argument("operation", type=upper_string, metavar="operation",
             choices=["SUM", "COUNT", "AVG", "HEADERS"],
