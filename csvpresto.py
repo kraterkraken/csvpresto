@@ -72,7 +72,8 @@ if args.analyze_headers:
     print("Column\tHeader (Description)")
     print("------\t--------------------")
     for i, header in enumerate(headers):
-        print(f"{pad_left(str(i), 6)}\t{header}")
+        istr = pad_left(str(i), 6)
+        print(f"{istr}\t{header}")
     sys.exit(0)
 
 # put the string arguments into a list as integers
