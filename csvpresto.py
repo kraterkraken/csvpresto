@@ -25,32 +25,35 @@ def pad_left(s, n):
 class ArgRetriever:
     def __init__(self):
         parser = ArgumentParser()
-        parser.add_argument("-g", dest="group_cols", nargs='+', type=int,
-            help="The list of columns to group by.  Ex: 1 2 3 4")
-        parser.add_argument("-s", dest="stat_cols", nargs='+', type=int,
-            help="The list of columns to gather stats on.  Ex: 5 6 7")
-        parser.add_argument("-f", dest="file_name", required=True,
-            help="The CSV file to use as input")
-        parser.add_argument("-o", dest="operation", type=upper_string,
-            choices=["SUM", "COUNT", "AVG"], default="SUM",
-            help="The statistical operation to perform")
-        parser.add_argument("-a", dest="analyze_headers", action="store_true",
-            help="Indicates that the program should spit out an analysis of the "
-            "headers to help the user choose columns for grouping and stat "
-            "operations.  Note that this option overrides all the others.")
+
+        parser.add_argument("operation", type=upper_string, metavar="operation",
+            choices=["SUM", "COUNT", "AVG", "HEADERS"],
+            help="The operation to perform.  "
+                "Valid choices are: SUM, AVG, COUNT, and HEADERS.  "
+                "SUM and AVG calculate the sum and average of the data in the "
+                "columns specified by -s, grouping by the columns specified by -g.  "
+                "COUNT counts the number of records for each distinct group specified by -g.  "
+                "HEADERS displays all of the headers and their column numbers as an "
+                "aid in determining what values to use for the -g and -s arguments."
+                )
+
+        parser.add_argument("file_name", metavar="filename",
+            help="The CSV (comma-separated-value) file to use as input")
+
+        parser.add_argument("-g", dest="group_cols", nargs='+', type=int, metavar="col",
+            help="The list of columns to group by.  Ex: -g 1 2 3 4")
+        parser.add_argument("-s", dest="stat_cols", nargs='+', type=int, metavar="col",
+            help="The list of columns to perform stats on.  Ex: -s 5 6 7")
+
         args = parser.parse_args()
 
-        self.analyze_headers = args.analyze_headers
         self.group_cols = args.group_cols
         self.stat_cols = args.stat_cols
         self.file_name = args.file_name
         self.operation = args.operation
 
-        if self.analyze_headers:
-            pass
-        elif (self.group_cols == None or self.stat_cols == None):
-            sys.exit("Error: If -a is not specified, then both -g and -s must be supplied.")
-
+        if self.operation in ["AVG","SUM", "COUNT"] and None in [self.group_cols, self.stat_cols]:
+            sys.exit(f"Error: both -g and -s must be supplied for the {args.operation} operation.")
 
 # ------------------- MAIN PROGRAM --------------------------------------------
 args = ArgRetriever()
@@ -69,7 +72,7 @@ headers = data[:1][0]
 data = data[1:]
 
 # if the header analysis flag was specified, display the cols and headers, then exit
-if args.analyze_headers:
+if args.operation == "HEADERS":
     print("Column\tHeader (Description)")
     print("------\t--------------------")
     for i, header in enumerate(headers):
