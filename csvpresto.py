@@ -72,11 +72,10 @@ args = ArgRetriever()
 data = [line for line in reader(args.infile)]
 args.infile.close()
 
-
 headers = data[:1][0]
 data = data[1:]
 
-# if the header analysis flag was specified, display the cols and headers, then exit
+# if the headers operation was specified, display the cols and headers, then exit
 if args.operation == "HEADERS":
     print("Column\tHeader (Description)")
     print("------\t--------------------")
