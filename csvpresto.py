@@ -45,7 +45,7 @@ class ArgRetriever:
         parser.add_argument("file_name", metavar="filename",
             nargs='?', type=FileType('r'), default=sys.stdin,
             help="The CSV (comma-separated-value) file to use as input.  "
-                "If omitted, will read from standard input.")
+                "If omitted or '-', will read from standard input.")
 
         parser.add_argument("-g", dest="group_cols", nargs='+', type=int, metavar="col",
             help="The list of columns to group by.  Ex: -g 1 2 3 4")
