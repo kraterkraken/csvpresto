@@ -29,9 +29,11 @@ class ArgRetriever:
     def __init__(self):
         parser = ArgumentParser(
             usage="%(prog)s operation [filename] [options]",
+            add_help=False,
             description="Program to read in a CSV file and perform statistical operations on various columns.")
 
-        parser.add_argument("operation", type=upper_string, metavar="operation",
+        arg_group = parser.add_argument_group(title="Arguments")
+        arg_group.add_argument("operation", type=upper_string, metavar="operation",
             choices=["SUM", "COUNT", "AVG", "HEADERS"],
             help="The operation to perform.  "
                 "Valid choices are: SUM, AVG, COUNT, and HEADERS.  "
@@ -42,14 +44,17 @@ class ArgRetriever:
                 "aid in determining what values to use for the -g and -s arguments."
                 )
 
-        parser.add_argument("infile", metavar="filename",
+        arg_group.add_argument("infile", metavar="filename",
             nargs='?', type=FileType('r'), default=sys.stdin,
             help="The CSV (comma-separated-value) file to use as input.  "
                 "If omitted or '-', will read from standard input.")
 
-        parser.add_argument("-g", dest="group_cols", nargs='+', type=int, metavar="col",
+        opt_group = parser.add_argument_group(title="Options")
+
+        opt_group.add_argument("-h", action="help", help="Show this help message and exit.")
+        opt_group.add_argument("-g", dest="group_cols", nargs='+', type=int, metavar="col",
             help="The list of columns to group by.  Ex: -g 1 2 3 4")
-        parser.add_argument("-s", dest="stat_cols", nargs='+', type=int, metavar="col",
+        opt_group.add_argument("-s", dest="stat_cols", nargs='+', type=int, metavar="col",
             help="The list of columns to perform stats on.  "
                 "Required for SUM and AVG.  Ex: -s 5 6 7")
 
