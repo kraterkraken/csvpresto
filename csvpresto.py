@@ -1,4 +1,7 @@
+#!/usr/bin/env python3
+
 from argparse import ArgumentParser
+from argparse import FileType
 from csv import reader
 import sys
 
@@ -40,12 +43,15 @@ class ArgRetriever:
                 )
 
         parser.add_argument("file_name", metavar="filename",
-            help="The CSV (comma-separated-value) file to use as input")
+            nargs='?', type=FileType('r'), default=sys.stdin,
+            help="The CSV (comma-separated-value) file to use as input.  "
+                "If omitted, will read from standard input.")
 
         parser.add_argument("-g", dest="group_cols", nargs='+', type=int, metavar="col",
             help="The list of columns to group by.  Ex: -g 1 2 3 4")
         parser.add_argument("-s", dest="stat_cols", nargs='+', type=int, metavar="col",
-            help="The list of columns to perform stats on.  Ex: -s 5 6 7")
+            help="The list of columns to perform stats on.  "
+                "Required for SUM and AVG.  Ex: -s 5 6 7")
 
         args = parser.parse_args()
 
@@ -63,12 +69,9 @@ args = ArgRetriever()
 # read the data from the file into a 2D list
 # (note: I am using the csv module's reader object
 # to automagically handle commas inside quoted strings)
-data = []
-try:
-    with open(args.file_name) as file:
-        data = [line for line in reader(file)]
-except FileNotFoundError:
-    exit(f"Error: file not found - {args.file_name}")
+data = [line for line in reader(args.file_name)]
+args.file_name.close()
+
 
 headers = data[:1][0]
 data = data[1:]
