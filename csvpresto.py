@@ -42,7 +42,7 @@ class ArgRetriever:
                 "aid in determining what values to use for the -g and -s arguments."
                 )
 
-        parser.add_argument("file_name", metavar="filename",
+        parser.add_argument("infile", metavar="filename",
             nargs='?', type=FileType('r'), default=sys.stdin,
             help="The CSV (comma-separated-value) file to use as input.  "
                 "If omitted or '-', will read from standard input.")
@@ -57,7 +57,7 @@ class ArgRetriever:
 
         self.group_cols = args.group_cols
         self.stat_cols = args.stat_cols
-        self.file_name = args.file_name
+        self.infile = args.infile
         self.operation = args.operation
 
         if self.operation in ["AVG","SUM", "COUNT"] and None in [self.group_cols, self.stat_cols]:
@@ -69,8 +69,8 @@ args = ArgRetriever()
 # read the data from the file into a 2D list
 # (note: I am using the csv module's reader object
 # to automagically handle commas inside quoted strings)
-data = [line for line in reader(args.file_name)]
-args.file_name.close()
+data = [line for line in reader(args.infile)]
+args.infile.close()
 
 
 headers = data[:1][0]
