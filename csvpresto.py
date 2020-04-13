@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#WHAT IS GOing ON!!!?!?!
+
 from argparse import ArgumentParser
 from argparse import FileType
 from csv import reader
