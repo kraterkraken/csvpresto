@@ -70,7 +70,7 @@ class ArgRetriever:
         self.infile = args.infile
         self.operation = args.operation
 
-        if self.operation in ["AVG","SUM", "COUNT"] and None == self.stat_cols:
+        if self.operation in ["AVG","SUM"] and None == self.stat_cols:
             sys.exit(f"Error: -s must be supplied for the {self.operation} operation.")
 
 # ------------------- MAIN PROGRAM --------------------------------------------
@@ -82,7 +82,7 @@ args = ArgRetriever()
 # read the data from the file into a 2D list
 # (note: I am using the csv module's reader object
 # to automagically handle commas inside quoted strings)
-data = [line + ["ALL"] for line in reader(args.infile)]
+data = [line + ["ALL ROWS"] for line in reader(args.infile)]
 args.infile.close()
 
 headers = data[:1][0]
@@ -97,10 +97,15 @@ if args.operation == "HEADERS":
         print(f"{istr}\t{header}")
     sys.exit(0)
 
-# if no grouping column was specified, use the "ALL" column as the group
+# if no grouping column was specified, use the "ALL ROWS" column as the group
 # (this has the effect of printing just one set of stats for the entire file)
 if args.group_cols == None:
     args.group_cols = [len(headers) - 1]
+
+# if no stat column was specified (which is only valid for COUNT) then
+# use the "ALL ROWS" column.
+if args.stat_cols == None:
+    args.stat_cols = [len(headers) - 1]
 
 # put the string arguments into a list as integers
 group_list = [int(a) for a in args.group_cols]
@@ -128,7 +133,7 @@ group_list.reverse() # put the order back again
 print()
 print("{} ... {}".format(
     list_to_string([headers[i] for i in group_list]),
-    list_to_string([headers[i] for i in stat_list]))
+    list_to_string([args.operation + " " + headers[i] for i in stat_list]))
     )
 print("-----------------------------------------------------------------------")
 
