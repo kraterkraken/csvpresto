@@ -4,6 +4,7 @@ from argparse import ArgumentParser
 from argparse import FileType
 from csv import reader
 import sys
+import signal
 
 if sys.version_info.major < 3 or (sys.version_info.major == 3 and sys.version_info.minor < 2):
     sys.exit("Error: csvpresto requires Python 3.2 or higher")
@@ -24,6 +25,9 @@ def pad_left(s, n):
     # return s left-padded with spaces so that it is at least n characters long
     padding = " " * (n - len(s)) # this automatically does the right thing if len >= n
     return padding + s
+
+def signal_handler(sig, frame):
+    sys.exit(0)
 
 class ArgRetriever:
     def __init__(self):
@@ -70,6 +74,9 @@ class ArgRetriever:
             sys.exit(f"Error: -s must be supplied for the {self.operation} operation.")
 
 # ------------------- MAIN PROGRAM --------------------------------------------
+
+signal.signal(signal.SIGINT, signal_handler)
+
 args = ArgRetriever()
 
 # read the data from the file into a 2D list
