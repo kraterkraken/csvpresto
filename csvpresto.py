@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
- 
+
 from argparse import ArgumentParser
 from argparse import FileType
 from csv import reader
@@ -53,7 +53,8 @@ class ArgRetriever:
 
         opt_group.add_argument("-h", action="help", help="Show this help message and exit.")
         opt_group.add_argument("-g", dest="group_cols", nargs='+', type=int, metavar="col",
-            help="The list of columns to group by.  Ex: -g 1 2 3 4")
+            help="The list of columns to group by.  If omitted, will display one "
+                "set of stats for the entire file.  Ex: -g 1 2 3 4")
         opt_group.add_argument("-s", dest="stat_cols", nargs='+', type=int, metavar="col",
             help="The list of columns to perform stats on.  "
                 "Required for SUM and AVG.  Ex: -s 5 6 7")
@@ -65,8 +66,8 @@ class ArgRetriever:
         self.infile = args.infile
         self.operation = args.operation
 
-        if self.operation in ["AVG","SUM", "COUNT"] and None in [self.group_cols, self.stat_cols]:
-            sys.exit(f"Error: both -g and -s must be supplied for the {args.operation} operation.")
+        if self.operation in ["AVG","SUM", "COUNT"] and None == self.stat_cols:
+            sys.exit(f"Error: -s must be supplied for the {self.operation} operation.")
 
 # ------------------- MAIN PROGRAM --------------------------------------------
 args = ArgRetriever()
@@ -74,7 +75,7 @@ args = ArgRetriever()
 # read the data from the file into a 2D list
 # (note: I am using the csv module's reader object
 # to automagically handle commas inside quoted strings)
-data = [line for line in reader(args.infile)]
+data = [line + ["ALL"] for line in reader(args.infile)]
 args.infile.close()
 
 headers = data[:1][0]
@@ -88,6 +89,11 @@ if args.operation == "HEADERS":
         istr = pad_left(str(i), 6)
         print(f"{istr}\t{header}")
     sys.exit(0)
+
+# if no grouping column was specified, use the "ALL" column as the group
+# (this has the effect of printing just one set of stats for the entire file)
+if args.group_cols == None:
+    args.group_cols = [len(headers) - 1]
 
 # put the string arguments into a list as integers
 group_list = [int(a) for a in args.group_cols]
