@@ -29,6 +29,12 @@ def pad_left(s, n):
     padding = " " * (n - len(s)) # this automatically does the right thing if len >= n
     return padding + s
 
+def data_sort(data, sort_cols, reverse=False):
+    sort_cols.reverse() # reverse the order so the sorting works
+    for col in sort_cols:
+        data.sort(key=lambda x: x[col], reverse=reverse)
+    sort_cols.reverse() # put the order back again
+
 def signal_handler(sig, frame):
     sys.exit(0)
 
@@ -68,6 +74,10 @@ class ArgRetriever:
         opt_group.add_argument("-c", dest="csv_output", action="store_true",
             help="Causes the output to be in CSV format.  Useful for piping to "
                 "other commands or redirecting to a file.")
+        opt_group.add_argument("-a", dest="ascend_cols", nargs='+', type=int, metavar="col",
+            help="The list of columns to sort by (ascending).")
+        opt_group.add_argument("-d", dest="descend_cols", nargs='+', type=int, metavar="col",
+            help="The list of columns to sort by (descending).")
 
         args = parser.parse_args()
 
@@ -76,6 +86,12 @@ class ArgRetriever:
         self.infile = args.infile
         self.operation = args.operation
         self.csv_output = args.csv_output
+        self.ascend_cols = args.ascend_cols
+        self.descend_cols = args.descend_cols
+        self.sort = False
+
+        if self.ascend_cols != None or self.descend_cols != None:
+            self.sort = True
 
         if self.operation in ["AVG","SUM"] and None == self.stat_cols:
             sys.exit(f"Error: -s must be supplied for the {self.operation} operation.")
@@ -121,10 +137,10 @@ class DataFormatter:
             )
 
     def sort_ascend(self, cols):
-        pass
+        data_sort(data=self.data_grid, sort_cols=cols)
 
     def sort_descend(self,cols):
-        pass
+        data_sort(data=self.data_grid, sort_cols=cols, reverse=True)
 
     def calculate_col_widths(self):
         widths = [len(str(a)) for a in self.headers]
@@ -201,10 +217,7 @@ for i, row in enumerate(data):
         sys,exit(f"Error: row {i} has the wrong number of columns.")
 
 # sort the data by the grouping columns
-group_list.reverse() # reverse the order so the sorting works
-for col in group_list:
-    data.sort(key=lambda x: x[col])
-group_list.reverse() # put the order back again
+data_sort(data, group_list)
 
 # now iterate over the data, performing the desired operation for each group
 # and printing the results
@@ -256,6 +269,13 @@ for ctr, row in enumerate(data):
     prev_group = curr_group
 
 # print out the whole thing!
+if args.sort:
+    cols = group_list + stat_list
+    if args.ascend_cols != None:
+        formatter.sort_ascend([cols.index(a) for a in args.ascend_cols])
+    elif args.descend_cols != None:
+        formatter.sort_descend([cols.index(a) for a in args.descend_cols])
+
 if args.csv_output:
     formatter.display_as_csv()
 else:

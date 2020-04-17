@@ -31,4 +31,6 @@ Options:
                     and AVG. Ex: -s 5 6 7
   -c                Causes the output to be in CSV format. Useful for piping
                     to other commands or redirecting to a file.
+  -a col [col ...]  The list of columns to sort by (ascending).
+  -d col [col ...]  The list of columns to sort by (descending).
   ```
