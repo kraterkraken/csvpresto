@@ -29,4 +29,6 @@ Options:
                     one set of stats for the entire file. Ex: -g 1 2 3 4
   -s col [col ...]  The list of columns to perform stats on. Required for SUM
                     and AVG. Ex: -s 5 6 7
+  -c                Causes the output to be in CSV format. Useful for piping
+                    to other commands or redirecting to a file.
   ```

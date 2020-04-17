@@ -2,7 +2,7 @@
 
 from argparse import ArgumentParser
 from argparse import FileType
-from csv import reader
+import csv
 import sys
 import signal
 
@@ -15,8 +15,11 @@ def validate_number(s, row, col):
     except ValueError:
         sys.exit(f"Error: found non-numeric data '{s}' in row {row}, column {col}")
 
-def list_to_string(l):
-    return ", ".join([str(a) for a in l])
+def list_to_colstring(l, widths, spacing, max_width):
+    s = ""
+    for i, item in enumerate(l):
+        s += pad_left(str(item)[:max_width], min(max_width,widths[i])+spacing)
+    return(s)
 
 def upper_string(s):
     return s.upper()
@@ -62,6 +65,9 @@ class ArgRetriever:
         opt_group.add_argument("-s", dest="stat_cols", nargs='+', type=int, metavar="col",
             help="The list of columns to perform stats on.  "
                 "Required for SUM and AVG.  Ex: -s 5 6 7")
+        opt_group.add_argument("-c", dest="csv_output", action="store_true",
+            help="Causes the output to be in CSV format.  Useful for piping to "
+                "other commands or redirecting to a file.")
 
         args = parser.parse_args()
 
@@ -69,9 +75,65 @@ class ArgRetriever:
         self.stat_cols = args.stat_cols
         self.infile = args.infile
         self.operation = args.operation
+        self.csv_output = args.csv_output
 
         if self.operation in ["AVG","SUM"] and None == self.stat_cols:
             sys.exit(f"Error: -s must be supplied for the {self.operation} operation.")
+
+class DataFormatter:
+    def __init__(self):
+        self.headers = []
+        self.data_grid = []
+        self.col_widths = None
+        self.max_col_width = 15
+        self.col_spacing = 3
+
+    def add_data_row(self, res):
+        self.data_grid.append(res)
+
+    def set_headers(self, alist):
+        self.headers = alist
+
+    def display_as_csv(self):
+        csv_w = csv.writer(sys.stdout)
+        csv_w.writerow(self.headers)
+        csv_w.writerows(self.data_grid)
+
+    def display(self):
+        self.calculate_col_widths()
+
+        # display the headers
+        print()
+        print(list_to_colstring(
+            self.headers,
+            self.col_widths,
+            self.col_spacing,
+            self.max_col_width)
+        )
+        print('-' * 70)
+
+        # display the data
+        for row in self.data_grid:
+            print(list_to_colstring(
+                row, self.col_widths,
+                self.col_spacing,
+                self.max_col_width)
+            )
+
+    def sort_ascend(self, cols):
+        pass
+
+    def sort_descend(self,cols):
+        pass
+
+    def calculate_col_widths(self):
+        widths = [len(str(a)) for a in self.headers]
+        for i, row in enumerate(self.data_grid):
+            for j, result in enumerate(row):
+                widths[j] = max(widths[j], len(str(result)))
+        self.col_widths = widths
+
+
 
 # ------------------- MAIN PROGRAM --------------------------------------------
 
@@ -79,10 +141,25 @@ signal.signal(signal.SIGINT, signal_handler)
 
 args = ArgRetriever()
 
+# -- OUTLINE TO REFACTOR THE CODE --
+# INITIALIZE
+    # CHECK PYTHON VERSION
+    # HANDLE SIGINT
+    # GET COMMAND LINE ARGS
+# READ IN DATA
+# PERFORM OPERATION
+    # HEADERS OPERATION: DISPLAY HEADERS
+    # MATH OPERATIONS:
+        # VALIDATE DATA
+        # CALCULATE RESULTS
+        # DISPLAY RESULTS
+            # DISPLAY HEADER LINE (AND SEPARATOR)
+            # DISPLAY RESULT ROWS
+
 # read the data from the file into a 2D list
 # (note: I am using the csv module's reader object
 # to automagically handle commas inside quoted strings)
-data = [line + ["ALL ROWS"] for line in reader(args.infile)]
+data = [line + ["ALL ROWS"] for line in csv.reader(args.infile)]
 args.infile.close()
 
 headers = data[:1][0]
@@ -129,14 +206,6 @@ for col in group_list:
     data.sort(key=lambda x: x[col])
 group_list.reverse() # put the order back again
 
-# print the headers that we need
-print()
-print("{} ... {}".format(
-    list_to_string([headers[i] for i in group_list]),
-    list_to_string([args.operation + " " + headers[i] for i in stat_list]))
-    )
-print("-----------------------------------------------------------------------")
-
 # now iterate over the data, performing the desired operation for each group
 # and printing the results
 data.append([None for a in data[0]]) # add a a dummy row as the last row ... see below for why
@@ -147,26 +216,30 @@ count = [0 for a in stat_list]
 avg = [0 for a in stat_list]
 result = []
 
+formatter = DataFormatter()
+formatter.set_headers(
+    [headers[i] for i in group_list] +
+    [args.operation + ' ' + headers[i] for i in stat_list]
+)
+
 for ctr, row in enumerate(data):
 
     curr_group = [val for col, val in enumerate(row) if col in group_list]
 
-    # if the group changed, print the results for the previous group
-    # then reset the results for this new group
+    # if the group changed, store the results in the formatter for the
+    # previous group then reset the results for this new group
     if curr_group != prev_group:
         if args.operation == "SUM":
-            result = sum
+            formatter.add_data_row(prev_group + sum)
         elif args.operation == "COUNT":
-            result = count
+            formatter.add_data_row(prev_group + count)
         elif args.operation == "AVG":
-            result = [float(s)/float(c) for s,c in zip(sum,count)]
-
-        print(f"{list_to_string(prev_group)} ... {list_to_string(result)}")
+            avg = [float(s)/float(c) for s,c in zip(sum,count)]
+            formatter.add_data_row(prev_group + avg)
 
         sum = [0 for a in stat_list]
         count = [0 for a in stat_list]
         avg = [0 for a in stat_list]
-        result = []
 
     # if we are on the last row (the dummy row ... see above),
     # then there are no results to tabulate, so just exit the loop (we are done)
@@ -181,3 +254,9 @@ for ctr, row in enumerate(data):
         count[result_index] += 1
 
     prev_group = curr_group
+
+# print out the whole thing!
+if args.csv_output:
+    formatter.display_as_csv()
+else:
+    formatter.display()
