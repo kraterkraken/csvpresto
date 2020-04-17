@@ -67,7 +67,8 @@ class ArgRetriever:
         opt_group.add_argument("-h", action="help", help="Show this help message and exit.")
         opt_group.add_argument("-g", dest="group_cols", nargs='+', type=int, metavar="col",
             help="The list of columns to group by.  If omitted, will display one "
-                "set of stats for the entire file.  Ex: -g 1 2 3 4")
+                "set of stats for the entire file.  Output is sorted by these "
+                "columns by default.  Ex: -g 1 2 3 4")
         opt_group.add_argument("-s", dest="stat_cols", nargs='+', type=int, metavar="col",
             help="The list of columns to perform stats on.  "
                 "Required for SUM and AVG.  Ex: -s 5 6 7")
@@ -131,7 +132,8 @@ class DataFormatter:
         # display the data
         for row in self.data_grid:
             print(list_to_colstring(
-                row, self.col_widths,
+                row,
+                self.col_widths,
                 self.col_spacing,
                 self.max_col_width)
             )
