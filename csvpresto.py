@@ -88,8 +88,8 @@ class DataFormatter:
         self.max_col_width = 15
         self.col_spacing = 3
 
-    def add_data_row(self, res):
-        self.data_grid.append(res)
+    def add_data_row(self, r):
+        self.data_grid.append(r)
 
     def set_headers(self, alist):
         self.headers = alist
