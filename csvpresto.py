@@ -89,10 +89,6 @@ class ArgRetriever:
         self.csv_output = args.csv_output
         self.ascend_cols = args.ascend_cols
         self.descend_cols = args.descend_cols
-        self.sort = False
-
-        if self.ascend_cols != None or self.descend_cols != None:
-            self.sort = True
 
         if self.operation in ["AVG","SUM"] and None == self.stat_cols:
             sys.exit(f"Error: -s must be supplied for the {self.operation} operation.")
@@ -205,6 +201,7 @@ if args.stat_cols == None:
 # put the string arguments into a list as integers
 group_list = [int(a) for a in args.group_cols]
 stat_list = [int(a) for a in args.stat_cols]
+combined_cols = group_list + stat_list
 
 # validate the data
 if len(data) == 0:
@@ -271,12 +268,10 @@ for ctr, row in enumerate(data):
     prev_group = curr_group
 
 # print out the whole thing!
-if args.sort:
-    cols = group_list + stat_list
-    if args.ascend_cols != None:
-        formatter.sort_ascend([cols.index(a) for a in args.ascend_cols])
-    elif args.descend_cols != None:
-        formatter.sort_descend([cols.index(a) for a in args.descend_cols])
+if args.ascend_cols != None:
+    formatter.sort_ascend([combined_cols.index(a) for a in args.ascend_cols])
+elif args.descend_cols != None:
+    formatter.sort_descend([combined_cols.index(a) for a in args.descend_cols])
 
 if args.csv_output:
     formatter.display_as_csv()
