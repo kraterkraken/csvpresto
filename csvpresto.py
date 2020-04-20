@@ -47,10 +47,10 @@ class ArgRetriever:
 
         arg_group = parser.add_argument_group(title="Arguments")
         arg_group.add_argument("operation", type=upper_string, metavar="operation",
-            choices=["SUM", "COUNT", "AVG", "HEADERS"],
+            choices=["SUM", "COUNT", "AVG", "MIN", "MAX", "HEADERS"],
             help="The operation to perform.  "
-                "Valid choices are: SUM, AVG, COUNT, and HEADERS.  "
-                "SUM and AVG calculate the sum and average of the data in the "
+                "Valid choices are: SUM, AVG, MIN, MAX, COUNT, and HEADERS.  "
+                "SUM, AVG, MIN, and MAX calculate the relevant stat in the "
                 "columns specified by -s, grouping by the columns specified by -g.  "
                 "COUNT counts the number of records for each distinct group specified by -g.  "
                 "HEADERS displays all of the headers and their column numbers as an "
@@ -226,6 +226,7 @@ prev_group = [val for col, val in enumerate(data[0]) if col in group_list]
 sum = [0 for a in stat_list]
 count = [0 for a in stat_list]
 avg = [0 for a in stat_list]
+minmax = [None for a in stat_list]
 result = []
 
 formatter = DataFormatter()
@@ -248,10 +249,13 @@ for ctr, row in enumerate(data):
         elif args.operation == "AVG":
             avg = [float(s)/float(c) for s,c in zip(sum,count)]
             formatter.add_data_row(prev_group + avg)
+        elif args.operation in ("MIN", "MAX"):
+            formatter.add_data_row(prev_group + minmax)
 
         sum = [0 for a in stat_list]
         count = [0 for a in stat_list]
         avg = [0 for a in stat_list]
+        minmax = [None for a in stat_list]
 
     # if we are on the last row (the dummy row ... see above),
     # then there are no results to tabulate, so just exit the loop (we are done)
@@ -263,6 +267,14 @@ for ctr, row in enumerate(data):
         if args.operation != "COUNT":
             validate_number(row[row_index], ctr, row_index)
             sum[result_index] += float(row[row_index])
+
+            if minmax[result_index] == None:
+                minmax[result_index] = float(row[row_index])
+            elif args.operation == "MIN":
+                minmax[result_index] = min(minmax[result_index], float(row[row_index]))
+            elif args.operation == "MAX":
+                minmax[result_index] = max(minmax[result_index], float(row[row_index]))
+
         count[result_index] += 1
 
     prev_group = curr_group
