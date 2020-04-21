@@ -8,11 +8,11 @@ import signal
 
 ########## UTILITY FUNCTIONS ###################################################
 
-def validate_number(s, row, col):
+def safe_float(s, err_msg):
     try:
-        float(s)
+        return float(s)
     except ValueError:
-        sys.exit(f"Error: found non-numeric data '{s}' in row {row}, column {col}")
+        sys.exit(err_msg)
 
 def upper_string(s):
     return s.upper()
@@ -307,10 +307,9 @@ for ctr, row in enumerate(data):
 
     # tabulate the results for the current row
     for result_index, row_index in enumerate(stat_list):
-        if args.operation != "COUNT":
-            validate_number(row[row_index], ctr, row_index)
-
-        accumulators[result_index].accumulate(float(row[row_index]))
+        value = safe_float(row[row_index],
+            f"Error: found non-numeric data '{row[row_index]}' in row {ctr}, column {row_index}")
+        accumulators[result_index].accumulate(value)
 
     prev_group = curr_group
 
