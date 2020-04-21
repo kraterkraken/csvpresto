@@ -7,7 +7,7 @@ import sys
 import signal
 
 if sys.version_info.major < 3 or (sys.version_info.major == 3 and sys.version_info.minor < 6):
-    sys.exit("Error: csvpresto requires Python 3.2 or higher")
+    sys.exit("Error: csvpresto requires Python 3.6 or higher")
 
 def validate_number(s, row, col):
     try:
