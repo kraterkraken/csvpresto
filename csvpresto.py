@@ -6,9 +6,6 @@ import csv
 import sys
 import signal
 
-if sys.version_info.major < 3 or (sys.version_info.major == 3 and sys.version_info.minor < 6):
-    sys.exit("Error: csvpresto requires Python 3.6 or higher")
-
 def validate_number(s, row, col):
     try:
         float(s)
@@ -215,7 +212,6 @@ class MinAccumulator(Accumulator):
 # ------------------- MAIN PROGRAM --------------------------------------------
 # -- OUTLINE --
 # INITIALIZE
-    # CHECK PYTHON VERSION
     # HANDLE SIGINT
     # GET COMMAND LINE ARGS
 # READ IN DATA
