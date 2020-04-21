@@ -196,8 +196,6 @@ class SumAccumulator(Accumulator):
 class AverageAccumulator(SumAccumulator):
     def get_value(self):
         return float(self._value) / float(self._count)
-    def _sub_start_value(self, value):
-        return value
 
 class MaxAccumulator(Accumulator):
     def _sub_accumulate(self, value):
