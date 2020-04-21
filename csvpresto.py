@@ -176,8 +176,8 @@ args = ArgRetriever()
 data = [line + ["ALL ROWS"] for line in csv.reader(args.infile)]
 args.infile.close()
 
-headers = data[:1][0]
-data = data[1:]
+headers = data[0]  # zeroth row is the headers
+data = data[1:]    # all subsequent rows are data
 
 # if the headers operation was specified, display the cols and headers, then exit
 if args.operation == "HEADERS":
