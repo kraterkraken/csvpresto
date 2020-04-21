@@ -182,6 +182,9 @@ class Accumulator:
         self._value = self._count
 
     def _sub_start_value(self, value):
+        # It may seem dumb that I'm not letting __init__ initialize this properly,
+        # but that won't work.  For Min and Max, you don't know what to initialize
+        # _value to until the first call to accumulate().
         return 1
 
     def get_value(self):
