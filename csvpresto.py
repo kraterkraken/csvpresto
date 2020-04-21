@@ -158,8 +158,10 @@ class AccumulatorFactory():
             return SumAccumulator()
         elif type == "AVG":
             return AverageAccumulator()
-        else:
+        elif type == "COUNT":
             return Accumulator()
+        else:
+            raise ValueError(f"Bad Accumulator type: '{type}'")
 
 class Accumulator:
     def __init__(self):
@@ -172,12 +174,15 @@ class Accumulator:
     def accumulate(self, value):
         self._count += 1
         if self._value == None:
-            self._value = value
+            self._value = self._sub_start_value(value)
         else:
             self._sub_accumulate(value)
 
     def _sub_accumulate(self, value):
         self._value = self._count
+
+    def _sub_start_value(self, value):
+        return 1
 
     def get_value(self):
         return self._value
@@ -185,18 +190,26 @@ class Accumulator:
 class SumAccumulator(Accumulator):
     def _sub_accumulate(self, value):
         self._value += value
+    def _sub_start_value(self, value):
+        return value
 
 class AverageAccumulator(SumAccumulator):
     def get_value(self):
         return float(self._value) / float(self._count)
+    def _sub_start_value(self, value):
+        return value
 
 class MaxAccumulator(Accumulator):
     def _sub_accumulate(self, value):
         self._value = max(value, self._value)
+    def _sub_start_value(self, value):
+        return value
 
 class MinAccumulator(Accumulator):
     def _sub_accumulate(self, value):
         self._value = min(value, self._value)
+    def _sub_start_value(self, value):
+        return value
 
 # ------------------- MAIN PROGRAM --------------------------------------------
 
