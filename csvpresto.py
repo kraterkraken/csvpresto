@@ -15,12 +15,6 @@ def validate_number(s, row, col):
     except ValueError:
         sys.exit(f"Error: found non-numeric data '{s}' in row {row}, column {col}")
 
-def list_to_colstring(l, widths, spacing, max_width):
-    s = ""
-    for i, item in enumerate(l):
-        s += pad_left(str(item)[:max_width], min(max_width,widths[i])+spacing)
-    return(s)
-
 def upper_string(s):
     return s.upper()
 
@@ -117,7 +111,7 @@ class DataFormatter:
 
         # display the headers
         print()
-        print(list_to_colstring(
+        print(self.list_to_colstring(
             self.headers,
             self.col_widths,
             self.col_spacing,
@@ -127,7 +121,7 @@ class DataFormatter:
 
         # display the data
         for row in self.data_grid:
-            print(list_to_colstring(
+            print(self.list_to_colstring(
                 row,
                 self.col_widths,
                 self.col_spacing,
@@ -147,7 +141,62 @@ class DataFormatter:
                 widths[j] = max(widths[j], len(str(result)))
         self.col_widths = widths
 
+    def list_to_colstring(self,l, widths, spacing, max_width):
+        s = ""
+        for i, item in enumerate(l):
+            s += pad_left(str(item)[:max_width], min(max_width,widths[i])+spacing)
+        return(s)
 
+class AccumulatorFactory():
+    @classmethod
+    def new_accumulator(cls, type):
+        if type == "MAX":
+            return MaxAccumulator()
+        elif type == "MIN":
+            return MinAccumulator()
+        elif type == "SUM":
+            return SumAccumulator()
+        elif type == "AVG":
+            return AverageAccumulator()
+        else:
+            return Accumulator()
+
+class Accumulator:
+    def __init__(self):
+        self.reset()
+
+    def reset(self):
+        self._value = None
+        self._count = 0
+
+    def accumulate(self, value):
+        self._count += 1
+        if self._value == None:
+            self._value = value
+        else:
+            self._sub_accumulate(value)
+
+    def _sub_accumulate(self, value):
+        self._value = self._count
+
+    def get_value(self):
+        return self._value
+
+class SumAccumulator(Accumulator):
+    def _sub_accumulate(self, value):
+        self._value += value
+
+class AverageAccumulator(SumAccumulator):
+    def get_value(self):
+        return float(self._value) / float(self._count)
+
+class MaxAccumulator(Accumulator):
+    def _sub_accumulate(self, value):
+        self._value = max(value, self._value)
+
+class MinAccumulator(Accumulator):
+    def _sub_accumulate(self, value):
+        self._value = min(value, self._value)
 
 # ------------------- MAIN PROGRAM --------------------------------------------
 
@@ -215,19 +264,13 @@ for i, row in enumerate(data):
     if len(row) != len(headers):
         sys,exit(f"Error: row {i} has the wrong number of columns.")
 
-# sort the data by the grouping columns
-data_sort(data, group_list)
-
 # now iterate over the data, performing the desired operation for each group
 # and printing the results
+data_sort(data, group_list)
 data.append([None for a in data[0]]) # add a a dummy row as the last row ... see below for why
 prev_group = [val for col, val in enumerate(data[0]) if col in group_list]
 
-sum = [0 for a in stat_list]
-count = [0 for a in stat_list]
-avg = [0 for a in stat_list]
-minmax = [None for a in stat_list]
-result = []
+accumulators = [AccumulatorFactory.new_accumulator(args.operation) for a in stat_list]
 
 formatter = DataFormatter()
 formatter.set_headers(
@@ -242,20 +285,9 @@ for ctr, row in enumerate(data):
     # if the group changed, store the results in the formatter for the
     # previous group then reset the results for this new group
     if curr_group != prev_group:
-        if args.operation == "SUM":
-            formatter.add_data_row(prev_group + sum)
-        elif args.operation == "COUNT":
-            formatter.add_data_row(prev_group + count)
-        elif args.operation == "AVG":
-            avg = [float(s)/float(c) for s,c in zip(sum,count)]
-            formatter.add_data_row(prev_group + avg)
-        elif args.operation in ("MIN", "MAX"):
-            formatter.add_data_row(prev_group + minmax)
-
-        sum = [0 for a in stat_list]
-        count = [0 for a in stat_list]
-        avg = [0 for a in stat_list]
-        minmax = [None for a in stat_list]
+        values = [acc.get_value() for acc in accumulators]
+        formatter.add_data_row(prev_group + values)
+        for acc in accumulators: acc.reset()
 
     # if we are on the last row (the dummy row ... see above),
     # then there are no results to tabulate, so just exit the loop (we are done)
@@ -266,16 +298,8 @@ for ctr, row in enumerate(data):
     for result_index, row_index in enumerate(stat_list):
         if args.operation != "COUNT":
             validate_number(row[row_index], ctr, row_index)
-            sum[result_index] += float(row[row_index])
 
-            if minmax[result_index] == None:
-                minmax[result_index] = float(row[row_index])
-            elif args.operation == "MIN":
-                minmax[result_index] = min(minmax[result_index], float(row[row_index]))
-            elif args.operation == "MAX":
-                minmax[result_index] = max(minmax[result_index], float(row[row_index]))
-
-        count[result_index] += 1
+        accumulators[result_index].accumulate(float(row[row_index]))
 
     prev_group = curr_group
 
