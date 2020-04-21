@@ -6,6 +6,8 @@ import csv
 import sys
 import signal
 
+########## UTILITY FUNCTIONS ###################################################
+
 def validate_number(s, row, col):
     try:
         float(s)
@@ -28,6 +30,8 @@ def data_sort(data, sort_cols, reverse=False):
 
 def signal_handler(sig, frame):
     sys.exit(0)
+
+########## UTILITY CLASSES #####################################################
 
 class ArgRetriever:
     def __init__(self):
@@ -209,7 +213,7 @@ class MinAccumulator(Accumulator):
     def _sub_start_value(self, value):
         return value
 
-# ------------------- MAIN PROGRAM --------------------------------------------
+########## MAIN PROGRAM ########################################################
 # -- OUTLINE --
 # INITIALIZE
     # HANDLE SIGINT
