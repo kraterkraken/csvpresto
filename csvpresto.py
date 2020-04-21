@@ -213,25 +213,22 @@ class MinAccumulator(Accumulator):
         return value
 
 # ------------------- MAIN PROGRAM --------------------------------------------
-
-signal.signal(signal.SIGINT, signal_handler)
-
-args = ArgRetriever()
-
-# -- OUTLINE TO REFACTOR THE CODE --
+# -- OUTLINE --
 # INITIALIZE
     # CHECK PYTHON VERSION
     # HANDLE SIGINT
     # GET COMMAND LINE ARGS
 # READ IN DATA
 # PERFORM OPERATION
-    # HEADERS OPERATION: DISPLAY HEADERS
+    # HEADERS OPERATION: DISPLAY HEADERS AND EXIT
     # MATH OPERATIONS:
         # VALIDATE DATA
         # CALCULATE RESULTS
         # DISPLAY RESULTS
-            # DISPLAY HEADER LINE (AND SEPARATOR)
-            # DISPLAY RESULT ROWS
+            # DISPLAY HEADERS AND RESULT ROWS
+
+signal.signal(signal.SIGINT, signal_handler)
+args = ArgRetriever()
 
 # read the data from the file into a 2D list
 # (note: I am using the csv module's reader object
