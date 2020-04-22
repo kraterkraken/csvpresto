@@ -86,7 +86,7 @@ class ArgRetriever:
         self.ascend_cols = args.ascend_cols
         self.descend_cols = args.descend_cols
 
-        if self.operation in ["AVG","SUM"] and None == self.stat_cols:
+        if self.operation in ["AVG","SUM", "MIN", "MAX"] and None == self.stat_cols:
             sys.exit(f"Error: -s must be supplied for the {self.operation} operation.")
 
 class DataFormatter:
