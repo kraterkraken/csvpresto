@@ -2,6 +2,7 @@
 
 from argparse import ArgumentParser
 from argparse import FileType
+from statistics import mean
 import csv
 import sys
 import signal
@@ -169,49 +170,29 @@ class Accumulator:
         self.reset()
 
     def reset(self):
-        self._value = None
-        self._count = 0
+        self._values = []
 
     def accumulate(self, value):
-        self._count += 1
-        if self._value == None:
-            self._value = self._sub_start_value(value)
-        else:
-            self._sub_accumulate(value)
-
-    def _sub_accumulate(self, value):
-        self._value = self._count
-
-    def _sub_start_value(self, value):
-        # It may seem dumb that I'm not letting __init__ initialize this properly,
-        # but that won't work.  For Min and Max, you don't know what to initialize
-        # _value to until the first call to accumulate().
-        return 1
+        self._values.append(value)
 
     def get_value(self):
-        return self._value
+        return len(self._values)
 
 class SumAccumulator(Accumulator):
-    def _sub_accumulate(self, value):
-        self._value += value
-    def _sub_start_value(self, value):
-        return value
-
-class AverageAccumulator(SumAccumulator):
     def get_value(self):
-        return float(self._value) / float(self._count)
+        return sum(self._values)
+
+class AverageAccumulator(Accumulator):
+    def get_value(self):
+        return mean(self._values)
 
 class MaxAccumulator(Accumulator):
-    def _sub_accumulate(self, value):
-        self._value = max(value, self._value)
-    def _sub_start_value(self, value):
-        return value
+    def get_value(self):
+        return max(self._values)
 
 class MinAccumulator(Accumulator):
-    def _sub_accumulate(self, value):
-        self._value = min(value, self._value)
-    def _sub_start_value(self, value):
-        return value
+    def get_value(self):
+        return min(self._values)
 
 ########## MAIN PROGRAM ########################################################
 # -- OUTLINE --
