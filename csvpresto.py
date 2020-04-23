@@ -67,7 +67,7 @@ class ArgRetriever:
                 "columns by default.  Ex: -g 1 2 3 4")
         opt_group.add_argument("-s", dest="stat_cols", nargs='+', type=int, metavar="col",
             help="The list of columns to perform stats on.  "
-                "Required for SUM and AVG.  Ex: -s 5 6 7")
+                "Required for SUM, AVG, MIN, and MAX.  Ex: -s 5 6 7")
         opt_group.add_argument("-c", dest="csv_output", action="store_true",
             help="Causes the output to be in CSV format.  Useful for piping to "
                 "other commands or redirecting to a file.")
