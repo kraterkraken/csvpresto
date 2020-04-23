@@ -75,19 +75,32 @@ class ArgRetriever:
             help="The list of columns to sort by (ascending).")
         opt_group.add_argument("-d", dest="descend_cols", nargs='+', type=int, metavar="col",
             help="The list of columns to sort by (descending).")
+        opt_group.add_argument("-r", dest="rows", type=int, metavar="N",
+            help="Display at most N rows of results.  Can be used in conjunction "
+            "with the -d/-a sorting options to show the top/bottom N rows.")
 
         args = parser.parse_args()
 
         self.group_cols = args.group_cols
         self.stat_cols = args.stat_cols
+        self.combined_cols = self.group_cols + self.stat_cols
         self.infile = args.infile
         self.operation = args.operation
         self.csv_output = args.csv_output
         self.ascend_cols = args.ascend_cols
         self.descend_cols = args.descend_cols
+        self.rows = args.rows
 
         if self.operation in ["AVG","SUM", "MIN", "MAX"] and None == self.stat_cols:
             sys.exit(f"Error: -s must be supplied for the {self.operation} operation.")
+
+        if self.sort_cols_bad(self.ascend_cols) or self.sort_cols_bad(self.descend_cols):
+            sys.exit("Error: you must choose columns from -g or -s to sort by.")
+
+    def sort_cols_bad(self, sort_cols):
+        if sort_cols == None: return False
+        intersec = set(sort_cols).intersection(self.combined_cols)
+        return len(intersec) != len(sort_cols)
 
 class DataFormatter:
     def __init__(self):
@@ -103,12 +116,13 @@ class DataFormatter:
     def set_headers(self, alist):
         self.headers = alist
 
-    def display_as_csv(self):
+    def display_as_csv(self, rows=None):
+        if rows==None: rows=len(self.data_grid)
         csv_w = csv.writer(sys.stdout)
         csv_w.writerow(self.headers)
-        csv_w.writerows(self.data_grid)
+        csv_w.writerows(self.data_grid[:rows])
 
-    def display(self):
+    def display(self, rows=None):
         self.calculate_col_widths()
 
         # display the headers
@@ -122,7 +136,8 @@ class DataFormatter:
         print('-' * 70)
 
         # display the data
-        for row in self.data_grid:
+        if rows==None: rows=len(self.data_grid)
+        for row in self.data_grid[:rows]:
             print(self.list_to_colstring(
                 row,
                 self.col_widths,
@@ -301,6 +316,6 @@ elif args.descend_cols != None:
     formatter.sort_descend([combined_cols.index(a) for a in args.descend_cols])
 
 if args.csv_output:
-    formatter.display_as_csv()
+    formatter.display_as_csv(args.rows)
 else:
-    formatter.display()
+    formatter.display(args.rows)
