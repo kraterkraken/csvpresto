@@ -28,8 +28,8 @@ Options:
   -g col [col ...]  The list of columns to group by. If omitted, will display
                     one set of stats for the entire file. Output is sorted by
                     these columns by default. Ex: -g 1 2 3 4
-  -s col [col ...]  The list of columns to perform stats on. Required for SUM
-                    and AVG. Ex: -s 5 6 7
+  -s col [col ...]  The list of columns to perform stats on. Required for SUM,
+                    AVG, MIN, and MAX. Ex: -s 5 6 7
   -c                Causes the output to be in CSV format. Useful for piping
                     to other commands or redirecting to a file.
   -a col [col ...]  The list of columns to sort by (ascending).
