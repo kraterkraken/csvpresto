@@ -34,4 +34,7 @@ Options:
                     to other commands or redirecting to a file.
   -a col [col ...]  The list of columns to sort by (ascending).
   -d col [col ...]  The list of columns to sort by (descending).
+  -r N              Display at most N rows of results. Can be used in
+                    conjunction with the -d/-a sorting options to show the
+                    top/bottom N rows.
   ```
