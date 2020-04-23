@@ -81,8 +81,8 @@ class ArgRetriever:
 
         args = parser.parse_args()
 
-        self.group_cols = args.group_cols
-        self.stat_cols = args.stat_cols
+        self.group_cols = [] if args.group_cols == None else args.group_cols
+        self.stat_cols = [] if args.stat_cols == None else args.stat_cols
         self.combined_cols = self.group_cols + self.stat_cols
         self.infile = args.infile
         self.operation = args.operation
@@ -245,12 +245,12 @@ if args.operation == "HEADERS":
 
 # if no grouping column was specified, use the "ALL ROWS" column as the group
 # (this has the effect of printing just one set of stats for the entire file)
-if args.group_cols == None:
+if len(args.group_cols) == 0:
     args.group_cols = [len(headers) - 1]
 
 # if no stat column was specified (which is only valid for COUNT) then
 # use the "ALL ROWS" column.
-if args.stat_cols == None:
+if len(args.stat_cols) == 0:
     args.stat_cols = [len(headers) - 1]
 
 # validate the data
