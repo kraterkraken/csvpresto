@@ -254,17 +254,12 @@ if args.group_cols == None:
 if args.stat_cols == None:
     args.stat_cols = [len(headers) - 1]
 
-# put the string arguments into a list as integers
-group_list = [int(a) for a in args.group_cols]
-stat_list = [int(a) for a in args.stat_cols]
-combined_cols = group_list + stat_list
-
 # validate the data
 if len(data) == 0:
     sys.exit("No data in file.")
-if max(group_list) >= len(headers):
+if max(args.group_cols) >= len(headers):
     sys.exit("Error: a specified group column is greater than the number of columns.")
-if max(stat_list) >= len(headers):
+if max(args.stat_cols) >= len(headers):
     sys.exit("Error: a specified stat column is greater than the number of columns.")
 
 for i, row in enumerate(data):
@@ -273,21 +268,21 @@ for i, row in enumerate(data):
 
 # now iterate over the data, performing the desired operation for each group
 # and printing the results
-data_sort(data, group_list)
+data_sort(data, args.group_cols)
 data.append([None for a in data[0]]) # add a a dummy row as the last row ... see below for why
-prev_group = [val for col, val in enumerate(data[0]) if col in group_list]
+prev_group = [val for col, val in enumerate(data[0]) if col in args.group_cols]
 
-accumulators = [AccumulatorFactory.new_accumulator(args.operation) for a in stat_list]
+accumulators = [AccumulatorFactory.new_accumulator(args.operation) for a in args.stat_cols]
 
 formatter = DataFormatter()
 formatter.set_headers(
-    [headers[i] for i in group_list] +
-    [args.operation + ' ' + headers[i] for i in stat_list]
+    [headers[i] for i in args.group_cols] +
+    [args.operation + ' ' + headers[i] for i in args.stat_cols]
 )
 
 for ctr, row in enumerate(data):
 
-    curr_group = [val for col, val in enumerate(row) if col in group_list]
+    curr_group = [val for col, val in enumerate(row) if col in args.group_cols]
 
     # if the group changed, store the results in the formatter for the
     # previous group then reset the results for this new group
@@ -302,7 +297,7 @@ for ctr, row in enumerate(data):
         break
 
     # tabulate the results for the current row
-    for result_index, row_index in enumerate(stat_list):
+    for result_index, row_index in enumerate(args.stat_cols):
         value = safe_float(row[row_index],
             f"Error: found non-numeric data '{row[row_index]}' in row {ctr}, column {row_index}")
         accumulators[result_index].accumulate(value)
@@ -311,9 +306,9 @@ for ctr, row in enumerate(data):
 
 # print out the whole thing!
 if args.ascend_cols != None:
-    formatter.sort_ascend([combined_cols.index(a) for a in args.ascend_cols])
+    formatter.sort_ascend([args.combined_cols.index(a) for a in args.ascend_cols])
 elif args.descend_cols != None:
-    formatter.sort_descend([combined_cols.index(a) for a in args.descend_cols])
+    formatter.sort_descend([args.combined_cols.index(a) for a in args.descend_cols])
 
 if args.csv_output:
     formatter.display_as_csv(args.rows)
