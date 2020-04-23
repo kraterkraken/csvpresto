@@ -164,23 +164,22 @@ class DataFormatter:
             s += pad_left(str(item)[:max_width], min(max_width,widths[i])+spacing)
         return(s)
 
-class AccumulatorFactory():
+class Accumulator:
     @classmethod
-    def new_accumulator(cls, type):
-        if type == "MAX":
+    def from_operation(cls, operation):
+        if operation == "MAX":
             return MaxAccumulator()
-        elif type == "MIN":
+        elif operation == "MIN":
             return MinAccumulator()
-        elif type == "SUM":
+        elif operation == "SUM":
             return SumAccumulator()
-        elif type == "AVG":
+        elif operation == "AVG":
             return AverageAccumulator()
-        elif type == "COUNT":
+        elif operation == "COUNT":
             return Accumulator()
         else:
-            raise ValueError(f"Bad Accumulator type: '{type}'")
+            raise ValueError(f"Bad Accumulator operation: '{operation}'")
 
-class Accumulator:
     def __init__(self):
         self.reset()
 
@@ -272,7 +271,7 @@ data_sort(data, args.group_cols)
 data.append([None for a in data[0]]) # add a a dummy row as the last row ... see below for why
 prev_group = [val for col, val in enumerate(data[0]) if col in args.group_cols]
 
-accumulators = [AccumulatorFactory.new_accumulator(args.operation) for a in args.stat_cols]
+accumulators = [Accumulator.from_operation(args.operation) for a in args.stat_cols]
 
 formatter = DataFormatter()
 formatter.set_headers(
