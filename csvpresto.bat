@@ -1,0 +1,1 @@
+python c:\csvpresto\csvpresto.py %*
