@@ -9,11 +9,11 @@ import signal
 
 ########## UTILITY FUNCTIONS ###################################################
 
-def safe_float(s, err_msg):
+def safe_float(s):
     try:
         return float(s)
     except ValueError:
-        sys.exit(err_msg)
+        raise BadFloatException
 
 def upper_string(s):
     return s.upper()
@@ -33,6 +33,9 @@ def signal_handler(sig, frame):
     sys.exit(0)
 
 ########## UTILITY CLASSES #####################################################
+
+class BadFloatException(Exception):
+    pass
 
 class ArgRetriever:
     def __init__(self):
@@ -192,19 +195,23 @@ class Accumulator:
     def get_value(self):
         return len(self._values)
 
-class SumAccumulator(Accumulator):
+class FloatAccumulator(Accumulator):
+    def accumulate(self, value):
+        self._values.append(safe_float(value))
+
+class SumAccumulator(FloatAccumulator):
     def get_value(self):
         return sum(self._values)
 
-class AverageAccumulator(Accumulator):
+class AverageAccumulator(FloatAccumulator):
     def get_value(self):
         return mean(self._values)
 
-class MaxAccumulator(Accumulator):
+class MaxAccumulator(FloatAccumulator):
     def get_value(self):
         return max(self._values)
 
-class MinAccumulator(Accumulator):
+class MinAccumulator(FloatAccumulator):
     def get_value(self):
         return min(self._values)
 
@@ -297,9 +304,10 @@ for ctr, row in enumerate(data):
 
     # tabulate the results for the current row
     for result_index, row_index in enumerate(args.stat_cols):
-        value = safe_float(row[row_index],
-            f"Error: found non-numeric data '{row[row_index]}' in row {ctr}, column {row_index}")
-        accumulators[result_index].accumulate(value)
+        try:
+            accumulators[result_index].accumulate(row[row_index])
+        except BadFloatException:
+            sys.exit(f"Error: found non-numeric data '{row[row_index]}' in row {ctr}, column {row_index}")
 
     prev_group = curr_group
 
