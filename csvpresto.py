@@ -38,7 +38,7 @@ class BadFloatException(Exception):
     pass
 
 class ArgRetriever:
-    def __init__(self):
+    def __init__(self, args=None):
         parser = ArgumentParser(
             usage="%(prog)s operation [filename] [options]",
             add_help=False,
@@ -82,7 +82,10 @@ class ArgRetriever:
             help="Display at most N rows of results.  Can be used in conjunction "
             "with the -d/-a sorting options to show the top/bottom N rows.")
 
-        args = parser.parse_args()
+        args = parser.parse_args(args)
+            # If args is not passed to the constructor, the above will get args
+            # from stdin.  This will be the most common scenario in actual use.
+            # The args constructor parameter is intended for unit testing.
 
         self.group_cols = [] if args.group_cols == None else args.group_cols
         self.stat_cols = [] if args.stat_cols == None else args.stat_cols
