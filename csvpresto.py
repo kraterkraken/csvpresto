@@ -218,109 +218,114 @@ class MinAccumulator(FloatAccumulator):
     def get_value(self):
         return min(self._values)
 
+class CsvPresto:
+    def run(self, arguments=None):
+        # INITIALIZE
+            # GET COMMAND LINE ARGS
+        # READ IN DATA
+        # PERFORM OPERATION
+            # HEADERS OPERATION: DISPLAY HEADERS AND EXIT
+            # MATH OPERATIONS:
+                # VALIDATE DATA
+                # CALCULATE RESULTS
+                # DISPLAY RESULTS
+                    # DISPLAY HEADERS AND RESULT ROWS
+
+        args = ArgRetriever(arguments)
+
+        # read the data from the file into a 2D list
+        # (note: I am using the csv module's reader object
+        # to automagically handle commas inside quoted strings)
+        data = [line + ["ALL ROWS"] for line in csv.reader(args.infile)]
+        args.infile.close()
+
+        headers = data[0]  # zeroth row is the headers
+        data = data[1:]    # all subsequent rows are data
+
+        # if the headers operation was specified, display the cols and headers, then exit
+        if args.operation == "HEADERS":
+            print("Column\tHeader (Description)")
+            print("------\t--------------------")
+            for i, header in enumerate(headers):
+                istr = pad_left(str(i), 6)
+                print(f"{istr}\t{header}")
+            sys.exit(0)
+
+        # if no grouping column was specified, use the "ALL ROWS" column as the group
+        # (this has the effect of printing just one set of stats for the entire file)
+        if len(args.group_cols) == 0:
+            args.group_cols = [len(headers) - 1]
+
+        # if no stat column was specified (which is only valid for COUNT) then
+        # use the "ALL ROWS" column.
+        if len(args.stat_cols) == 0:
+            args.stat_cols = [len(headers) - 1]
+
+        # validate the data
+        if len(data) == 0:
+            sys.exit("No data in file.")
+        if max(args.group_cols) >= len(headers):
+            sys.exit("Error: a specified group column is greater than the number of columns.")
+        if max(args.stat_cols) >= len(headers):
+            sys.exit("Error: a specified stat column is greater than the number of columns.")
+
+        for i, row in enumerate(data):
+            if len(row) != len(headers):
+                sys,exit(f"Error: row {i} has the wrong number of columns.")
+
+        # now iterate over the data, performing the desired operation for each group
+        # and printing the results
+        data_sort(data, args.group_cols)
+        data.append([None for a in data[0]]) # add a a dummy row as the last row ... see below for why
+        prev_group = [val for col, val in enumerate(data[0]) if col in args.group_cols]
+
+        accumulators = [Accumulator.from_operation(args.operation) for a in args.stat_cols]
+
+        formatter = DataFormatter()
+        formatter.set_headers(
+            [headers[i] for i in args.group_cols] +
+            [args.operation + ' ' + headers[i] for i in args.stat_cols]
+        )
+
+        for ctr, row in enumerate(data):
+
+            curr_group = [val for col, val in enumerate(row) if col in args.group_cols]
+
+            # if the group changed, store the results in the formatter for the
+            # previous group then reset the results for this new group
+            if curr_group != prev_group:
+                values = [acc.get_value() for acc in accumulators]
+                formatter.add_data_row(prev_group + values)
+                for acc in accumulators: acc.reset()
+
+            # if we are on the last row (the dummy row ... see above),
+            # then there are no results to tabulate, so just exit the loop (we are done)
+            if ctr == len(data) - 1:
+                break
+
+            # tabulate the results for the current row
+            for result_index, row_index in enumerate(args.stat_cols):
+                try:
+                    accumulators[result_index].accumulate(row[row_index])
+                except BadFloatException:
+                    sys.exit(f"Error: found non-numeric data '{row[row_index]}' in row {ctr}, column {row_index}")
+
+            prev_group = curr_group
+
+        # print out the whole thing!
+        if args.ascend_cols != None:
+            formatter.sort_ascend([args.combined_cols.index(a) for a in args.ascend_cols])
+        elif args.descend_cols != None:
+            formatter.sort_descend([args.combined_cols.index(a) for a in args.descend_cols])
+
+        if args.csv_output:
+            formatter.display_as_csv(args.rows)
+        else:
+            formatter.display(args.rows)
+
 ########## MAIN PROGRAM ########################################################
-# -- OUTLINE --
-# INITIALIZE
-    # HANDLE SIGINT
-    # GET COMMAND LINE ARGS
-# READ IN DATA
-# PERFORM OPERATION
-    # HEADERS OPERATION: DISPLAY HEADERS AND EXIT
-    # MATH OPERATIONS:
-        # VALIDATE DATA
-        # CALCULATE RESULTS
-        # DISPLAY RESULTS
-            # DISPLAY HEADERS AND RESULT ROWS
-
-signal.signal(signal.SIGINT, signal_handler)
-args = ArgRetriever()
-
-# read the data from the file into a 2D list
-# (note: I am using the csv module's reader object
-# to automagically handle commas inside quoted strings)
-data = [line + ["ALL ROWS"] for line in csv.reader(args.infile)]
-args.infile.close()
-
-headers = data[0]  # zeroth row is the headers
-data = data[1:]    # all subsequent rows are data
-
-# if the headers operation was specified, display the cols and headers, then exit
-if args.operation == "HEADERS":
-    print("Column\tHeader (Description)")
-    print("------\t--------------------")
-    for i, header in enumerate(headers):
-        istr = pad_left(str(i), 6)
-        print(f"{istr}\t{header}")
-    sys.exit(0)
-
-# if no grouping column was specified, use the "ALL ROWS" column as the group
-# (this has the effect of printing just one set of stats for the entire file)
-if len(args.group_cols) == 0:
-    args.group_cols = [len(headers) - 1]
-
-# if no stat column was specified (which is only valid for COUNT) then
-# use the "ALL ROWS" column.
-if len(args.stat_cols) == 0:
-    args.stat_cols = [len(headers) - 1]
-
-# validate the data
-if len(data) == 0:
-    sys.exit("No data in file.")
-if max(args.group_cols) >= len(headers):
-    sys.exit("Error: a specified group column is greater than the number of columns.")
-if max(args.stat_cols) >= len(headers):
-    sys.exit("Error: a specified stat column is greater than the number of columns.")
-
-for i, row in enumerate(data):
-    if len(row) != len(headers):
-        sys,exit(f"Error: row {i} has the wrong number of columns.")
-
-# now iterate over the data, performing the desired operation for each group
-# and printing the results
-data_sort(data, args.group_cols)
-data.append([None for a in data[0]]) # add a a dummy row as the last row ... see below for why
-prev_group = [val for col, val in enumerate(data[0]) if col in args.group_cols]
-
-accumulators = [Accumulator.from_operation(args.operation) for a in args.stat_cols]
-
-formatter = DataFormatter()
-formatter.set_headers(
-    [headers[i] for i in args.group_cols] +
-    [args.operation + ' ' + headers[i] for i in args.stat_cols]
-)
-
-for ctr, row in enumerate(data):
-
-    curr_group = [val for col, val in enumerate(row) if col in args.group_cols]
-
-    # if the group changed, store the results in the formatter for the
-    # previous group then reset the results for this new group
-    if curr_group != prev_group:
-        values = [acc.get_value() for acc in accumulators]
-        formatter.add_data_row(prev_group + values)
-        for acc in accumulators: acc.reset()
-
-    # if we are on the last row (the dummy row ... see above),
-    # then there are no results to tabulate, so just exit the loop (we are done)
-    if ctr == len(data) - 1:
-        break
-
-    # tabulate the results for the current row
-    for result_index, row_index in enumerate(args.stat_cols):
-        try:
-            accumulators[result_index].accumulate(row[row_index])
-        except BadFloatException:
-            sys.exit(f"Error: found non-numeric data '{row[row_index]}' in row {ctr}, column {row_index}")
-
-    prev_group = curr_group
-
-# print out the whole thing!
-if args.ascend_cols != None:
-    formatter.sort_ascend([args.combined_cols.index(a) for a in args.ascend_cols])
-elif args.descend_cols != None:
-    formatter.sort_descend([args.combined_cols.index(a) for a in args.descend_cols])
-
-if args.csv_output:
-    formatter.display_as_csv(args.rows)
-else:
-    formatter.display(args.rows)
+if __name__ == "__main__":
+    # execute only if run as a script
+    signal.signal(signal.SIGINT, signal_handler)
+    csv_presto = CsvPresto()
+    csv_presto.run()
