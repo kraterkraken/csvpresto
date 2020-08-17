@@ -125,6 +125,8 @@ class DataFormatter:
     def display_as_csv(self, rows=None):
         if rows==None: rows=len(self.data_grid)
         csv_w = csv.writer(sys.stdout, lineterminator="\n")
+            # (Note: I had to set the lineterminator, otherwise piping and
+            # redirecting in MS windows would not work.)
         csv_w.writerow(self.headers)
         csv_w.writerows(self.data_grid[:rows])
 
