@@ -310,6 +310,7 @@ class CsvPresto:
                 try:
                     accumulators[result_index].accumulate(row[row_index])
                 except BadFloatException:
+                    print(row)
                     sys.exit(f"Error: found non-numeric data '{row[row_index]}' in row {ctr}, column {row_index}")
 
             prev_group = curr_group
